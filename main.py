@@ -10,7 +10,7 @@ API_TOKEN = '8395187432:AAGlx0H3cVr16-ResTU9RX5RoNLJLaG50As'
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)
+dp = Dispatcher()  # Исправлено: без аргументов
 
 # ----- Города Луганской области -----
 LUHANSK_CITIES = [
@@ -118,21 +118,17 @@ async def callbacks(call: types.CallbackQuery):
     data = call.data
     user_id = call.from_user.id
 
-    # Главное меню
     if data == "main_menu":
         await bot.edit_message_text("Главное меню:", user_id, call.message.message_id, reply_markup=main_menu())
 
-    # Разместить услугу
     elif data == "place_service":
         user_states[user_id] = {"step": "choose_city", "data": {}, "photos": []}
         await bot.edit_message_text("Выберите город для размещения услуги:", user_id, call.message.message_id, reply_markup=city_menu("place"))
 
-    # Найти услугу
     elif data == "find_service":
         user_states[user_id] = {"step": "search_city", "data": {}}
         await bot.edit_message_text("Выберите город для поиска услуги:", user_id, call.message.message_id, reply_markup=city_menu("find"))
 
-    # Выбор города
     elif data.startswith("place_") and data != "place_service":
         city = data.replace("place_", "")
         user_states[user_id]["data"]["city"] = city
@@ -145,7 +141,6 @@ async def callbacks(call: types.CallbackQuery):
         user_states[user_id]["step"] = "search_category"
         await bot.edit_message_text(f"Город выбран: {city}\nВыберите категорию для поиска:", user_id, call.message.message_id, reply_markup=category_menu("find"))
 
-    # Выбор категории
     elif data.startswith("place_") and data not in ["place_service"]:
         category = data.replace("place_", "")
         user_states[user_id]["data"]["category"] = category
@@ -158,7 +153,6 @@ async def callbacks(call: types.CallbackQuery):
         user_states[user_id]["step"] = "search_subcategory"
         await bot.edit_message_text(f"Категория выбрана: {category}\nВыберите подкатегорию для поиска:", user_id, call.message.message_id, reply_markup=subcategory_menu(category, "find"))
 
-    # Мои услуги
     elif data == "my_services":
         await bot.edit_message_text("Ваши услуги:", user_id, call.message.message_id, reply_markup=my_services_menu(user_id))
 
@@ -186,7 +180,7 @@ async def text_handler(message: types.Message):
             "active_until": None
         }
         services_db.append(new_service)
-        await message.answer(f"Услуга создана: {desc}\nНажмите «Я оплатил» для активации услуги.", reply_markup=payment_menu(service_id))
+        await message.answer(f"Услуга создана: {desc}\nНажмите «Я оплатил» для активации услуги.", reply_markup=InlineKeyboardMarkup().add(InlineKeyboardButton("Я оплатил ✅", callback_data=f"paid_{service_id}")))
         user_states.pop(user_id)
 
 # ----- Проверка подписки каждый день -----
@@ -197,11 +191,11 @@ async def check_subscriptions():
             if s['active'] and s['active_until'] and s['active_until'] < now:
                 s['active'] = False
                 await bot.send_message(s['user_id'], f"Подписка на услугу '{s['subcategory']}' завершена. Продлите её для повторной активности.")
-        await asyncio.sleep(86400)  # Проверка раз в сутки
+        await asyncio.sleep(86400)
 
 # ----- Запуск бота -----
 if __name__ == "__main__":
     async def main():
         asyncio.create_task(check_subscriptions())
-        await dp.start_polling()
+        await dp.start_polling(bot)  # Передаём bot сюда
     asyncio.run(main())
