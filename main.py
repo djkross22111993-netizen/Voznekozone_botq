@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 from aiogram import Bot, Dispatcher, types, Router
+from aiogram.filters import Command
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from datetime import datetime, timedelta
 import asyncio
@@ -9,7 +10,7 @@ API_TOKEN = '8395187432:AAGlx0H3cVr16-ResTU9RX5RoNLJLaG50As'
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher()  # без аргументов
+dp = Dispatcher()  # пустой Dispatcher
 router = Router()
 
 # ----- Города Луганской области -----
@@ -107,7 +108,7 @@ def my_services_menu(user_id):
     return kb
 
 # ----- Старт -----
-@router.message(commands=['start'])
+@router.message(Command("start"))
 async def start(message: types.Message):
     users_db[message.from_user.id] = {"name": message.from_user.full_name, "contact": ""}
     await message.answer("Добро пожаловать в VoznekoZone!\nВыберите действие:", reply_markup=main_menu())
