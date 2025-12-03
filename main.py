@@ -48,63 +48,63 @@ user_states = {}    # user_id: {"step":..., "data": {...}, "photos": []}
 
 # ----- Главное меню -----
 def main_menu():
-    kb = InlineKeyboardMarkup(row_width=2)
-    kb.add(
+    kb = InlineKeyboardMarkup()
+    kb.row(
         InlineKeyboardButton("Разместить услугу 💼", callback_data="place_service"),
         InlineKeyboardButton("Найти услугу 🔍", callback_data="find_service")
     )
-    kb.add(
+    kb.row(
         InlineKeyboardButton("Мои услуги 📋", callback_data="my_services"),
         InlineKeyboardButton("Отзывы и рейтинг ⭐", callback_data="reviews")
     )
-    kb.add(
+    kb.row(
         InlineKeyboardButton("Помощь / Информация ℹ️", callback_data="help")
     )
     return kb
 
 # ----- Меню города -----
 def city_menu(prefix):
-    kb = InlineKeyboardMarkup(row_width=2)
+    kb = InlineKeyboardMarkup()
     for city in LUHANSK_CITIES:
-        kb.add(InlineKeyboardButton(city, callback_data=f"{prefix}_{city}"))
-    kb.add(InlineKeyboardButton("⬅️ Назад", callback_data="main_menu"))
+        kb.row(InlineKeyboardButton(city, callback_data=f"{prefix}_{city}"))
+    kb.row(InlineKeyboardButton("⬅️ Назад", callback_data="main_menu"))
     return kb
 
 # ----- Меню категории -----
 def category_menu(prefix):
-    kb = InlineKeyboardMarkup(row_width=2)
+    kb = InlineKeyboardMarkup()
     for cat in CATEGORIES.keys():
-        kb.add(InlineKeyboardButton(cat, callback_data=f"{prefix}_{cat}"))
-    kb.add(InlineKeyboardButton("⬅️ Назад", callback_data="city_back"))
+        kb.row(InlineKeyboardButton(cat, callback_data=f"{prefix}_{cat}"))
+    kb.row(InlineKeyboardButton("⬅️ Назад", callback_data="city_back"))
     return kb
 
 # ----- Меню подкатегории -----
 def subcategory_menu(category, prefix):
-    kb = InlineKeyboardMarkup(row_width=2)
+    kb = InlineKeyboardMarkup()
     for subcat in CATEGORIES[category]:
-        kb.add(InlineKeyboardButton(subcat, callback_data=f"{prefix}_{subcat}"))
-    kb.add(InlineKeyboardButton("⬅️ Назад", callback_data="category_back"))
+        kb.row(InlineKeyboardButton(subcat, callback_data=f"{prefix}_{subcat}"))
+    kb.row(InlineKeyboardButton("⬅️ Назад", callback_data="category_back"))
     return kb
 
 # ----- Меню оплаты -----
 def payment_menu(service_id):
-    kb = InlineKeyboardMarkup(row_width=1)
-    kb.add(InlineKeyboardButton("Я оплатил ✅", callback_data=f"paid_{service_id}"))
-    kb.add(InlineKeyboardButton("⬅️ Назад", callback_data="main_menu"))
+    kb = InlineKeyboardMarkup()
+    kb.row(InlineKeyboardButton("Я оплатил ✅", callback_data=f"paid_{service_id}"))
+    kb.row(InlineKeyboardButton("⬅️ Назад", callback_data="main_menu"))
     return kb
 
 # ----- Меню Мои услуги -----
 def my_services_menu(user_id):
-    kb = InlineKeyboardMarkup(row_width=1)
+    kb = InlineKeyboardMarkup()
     user_services = [s for s in services_db if s['user_id']==user_id]
     if not user_services:
-        kb.add(InlineKeyboardButton("У вас пока нет услуг", callback_data="none"))
+        kb.row(InlineKeyboardButton("У вас пока нет услуг", callback_data="none"))
     else:
         for s in user_services:
             status = "✅ Активна" if s['active'] else "❌ Неактивна"
             title = f"{s['subcategory']} ({s['city']}) - {status} - Рейтинг: {s['rating']}/5"
-            kb.add(InlineKeyboardButton(title, callback_data=f"service_{s['service_id']}"))
-    kb.add(InlineKeyboardButton("⬅️ Назад", callback_data="main_menu"))
+            kb.row(InlineKeyboardButton(title, callback_data=f"service_{s['service_id']}"))
+    kb.row(InlineKeyboardButton("⬅️ Назад", callback_data="main_menu"))
     return kb
 
 # ----- Старт -----
